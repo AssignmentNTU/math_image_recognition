@@ -21,8 +21,8 @@ class Segmentor:
 		image_pil = Image.open(file_image_part)
 		result_boundaries = find_boundaries(image, mode='outer').astype(np.uint8)
 
-		x_range = image.shape[1]		#width
-		y_range = image.shape[0]		#height
+		x_range = image.shape[1]		# width
+		y_range = image.shape[0]		# height
 
 		list_x = []
 		list_y = []

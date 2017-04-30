@@ -1,4 +1,5 @@
 from common.ImageSegmentor import Segmentor
+from common.GradientImageSegmentor import ImageSegmentor
 
 if __name__ == "__main__":
 	# first segmenting all the image first
