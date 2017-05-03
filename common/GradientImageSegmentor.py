@@ -2,6 +2,7 @@ import numpy as np
 from skimage.segmentation import find_boundaries, mark_boundaries
 from skimage import io
 from PIL import Image
+import Queue as Q
 
 
 class ImageSegmentor:
@@ -23,13 +24,14 @@ class ImageSegmentor:
 
         index = 0
 
-        for x in range(self.x_range):
+        for x in range(self.y_range):
 
             list_added = []
 
-            for y in range(self.y_range):
+            for y in range(self.x_range):
                 list_added.append(index)
-                list_save_on_dict = [(y, x)]
+                # min_y, min_x, max_x, max_y
+                list_save_on_dict = [10000, 10000, 0, 0]
                 self.dictionary_location[index] = list_save_on_dict
                 index += 1
 
@@ -37,46 +39,97 @@ class ImageSegmentor:
 
         return
 
+    def start_dsu_image_segmenting(self):
+        stack = Q.PriorityQueue()
+        stack.put((self.image_boundaries[0][0], (0, 0, 0)))
+        self.start_image_segmenting(stack)
+        self.start_collecting_image_segmentation()
+
     # DSU
 
-    def start_image_segmenting(self, x_start, y_start, index):
-        self.visited[y_start][x_start] = 1
+    def start_image_segmenting(self, stack):
 
-        if self.parent_list[y_start][x_start] == 1:
-            self.parent_list[y_start][x_start] = index
-            self.dictionary_location[index].append((y_start, x_start))
+        # cannot use recursion function
 
-        for x_change in (0, -1, 1):
-            for y_change in (0, -1, 1):
-                x_end = x_start+x_change
-                y_end = y_start+y_change
-                if self.is_save(x_end, y_end, self.x_range, self.y_range):
-                    return self.start_image_segmenting(x_end, y_end, self.parent_list[y_start][x_start])
+        while stack.not_empty:
+            if stack.qsize() == 0:
+                return
+            pixel_location = stack.get()
+            pixel_data = pixel_location[1]
+            y_start = pixel_data[0]
+            x_start = pixel_data[1]
+            index = pixel_data[2]
+            self.visited[y_start][x_start] = 1
 
-    def is_save(self, x, y , max_x, max_y):
+            if 1 in self.image_boundaries[y_start][x_start]:
+                self.parent_list[y_start][x_start] = index
+                # record the max and the min
+                data_record = self.dictionary_location[index]
+                min_x = data_record[0]
+                min_y = data_record[1]
+                max_x = data_record[2]
+                max_y = data_record[3]
+                if y_start < min_y:
+                    min_y = y_start
 
-        if x >= max_x or y >= max_y or x < 0 or  y < 0 or self.visited[x][y] == 1:
+                if y_start > max_y:
+                    max_y = y_start
+
+                if x_start < min_x:
+                    min_x = x_start
+
+                if x_start > max_x:
+                    max_x = x_start
+
+                data_save = [min_x, min_y, max_x, max_y]
+                self.dictionary_location[index] = data_save
+
+            try:
+                index = self.parent_list[y_start][x_start]
+            except Exception as e:
+                print("y_start: %d, x_start: %d" % (y_start, x_start))
+
+            for x_change in (0, -1, 1):
+                for y_change in (0, -1, 1):
+                    x_end = x_start+x_change
+                    y_end = y_start+y_change
+                    if self.is_save(x_end, y_end, self.x_range, self.y_range):
+                        x_start, y_start = x_end, y_end
+                        self.visited[y_start][x_start] = 1
+                        if 1 in self.image_boundaries[y_end][x_end]:
+                            input_data = 1
+                        else:
+                            input_data = 0
+                        stack.put((input_data* -1,  (y_end, x_end, index)))
+
+    def is_save(self, x, y, max_x, max_y):
+
+        if x >= max_x or y >= max_y or x < 0 or y < 0 or self.visited[y][x] == 1:
             return False
 
         return True
 
+    def check_visited_graph(self):
+        for i in range(len(self.y_range)):
+            for j in range(len(self.x_range)):
+                if (self.visited[j][i]) == 0:
+                    return True
+        return False
+
+    # complexity is to high using this method
+    # m x n x m x n
+
     def start_collecting_image_segmentation(self):
-        number_part = 0 
+        number_part = 0
         for key, value in self.dictionary_location.iteritems():
-            if len(value) > self.LIMIT_PIXEL:
-                list_x = []
-                list_y = []
 
-                for pixel_location in value:
-                    list_x.append(pixel_location[0])
-                    list_y.append(pixel_location[1])
+            min_x = value[0]
+            min_y = value[1]
 
-                min_x = min(list_x)
-                min_y = min(list_y)
+            max_x = value[2]
+            max_y = value[3]
 
-                max_x = max(list_x)
-                max_y = max(list_y)
-
+            if max_y-min_y > self.LIMIT_PIXEL or max_x-min_x > self.LIMIT_PIXEL:
                 image_part = self.image_pil.crop((min_x, min_y, max_x, max_y))
-
-        return
+                image_part.save("image_part_"+str(number_part)+".png")
+                number_part += 1
