@@ -2,3 +2,4 @@
 *.jpg
 ENV/
 .idea/
+*.pyc
