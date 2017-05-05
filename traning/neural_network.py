@@ -13,23 +13,23 @@ class NeuralNetwork:
 	def __init__(self):
 		# basically the ide
 		self.hidden_layer_1 = {
-			"weight": tf.Variable(tf.RandomNormal([784, self.number_node_1])),
-			"biases": tf.Variable(tf.RandomNormal([self.number_node_1]))
+			"weight": tf.Variable(tf.random_normal([784, self.number_node_1])),
+			"biases": tf.Variable(tf.random_normal([self.number_node_1]))
 		}
 
 		self.hidden_layer_2 = {
-			"weight": tf.Variable(tf.RandomNormal([self.number_node_1, self.number_node_2])),
-			"biases": tf.Variable(tf.RandomNormal([self.number_node_2]))
+			"weight": tf.Variable(tf.random_normal([self.number_node_1, self.number_node_2])),
+			"biases": tf.Variable(tf.random_normal([self.number_node_2]))
 		}
 
 		self.hidden_layer_3 = {
-			"weight": tf.Variable(tf.RandomNormal([self.number_node_2, self.number_node_3])),
-			"biases": tf.Variable(tf.RandomNormal([self.number_node_3]))
+			"weight": tf.Variable(tf.random_normal([self.number_node_2, self.number_node_3])),
+			"biases": tf.Variable(tf.random_normal([self.number_node_3]))
 		}
 
 		self.output_layer = {
-			"weight": tf.Variable(tf.RandomNormal([self.number_node_3, self.output_classes])),
-			"biases": tf.Variable(tf.RandomNormal([self.output_classes]))
+			"weight": tf.Variable(tf.random_normal([self.number_node_3, self.output_classes])),
+			"biases": tf.Variable(tf.random_normal([self.output_classes]))
 		}
 
 		self.x = tf.placeholder('float', [None, 784])
@@ -53,7 +53,7 @@ class NeuralNetwork:
 
 	def start_training(self):
 		prediction = self.neural_network_model()
-		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(prediction))
+		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
 		optimizer = tf.train.AdamOptimizer().minimize(cost)
 		mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
 		hm_epoc = 10
@@ -70,4 +70,4 @@ class NeuralNetwork:
 					loss_epoch += c
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
 				accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-				print ("Epoch: %d Loss Epoch: %d, Accurracy: %f" % (epoch, loss_epoch, accuracy))
+				print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))
