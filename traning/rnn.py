@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.contrib import rnn
+import numpy as np
 # using tensorflow data example
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -27,9 +28,9 @@ class NeuralNetwork:
 	def neural_network_model(self):
 		data = self.x
 		# activation function essentially just  x = 0 if x < 0 else x
-		data = tf.unstack(data, self.n_chunk)
+		data = tf.unstack(data, self.n_chunk, 1)
 		lstm_cell = rnn.BasicLSTMCell(self.rnn_size)
-		output, states = rnn.static_rnn(lstm_cell, data)
+		output, states = rnn.static_rnn(lstm_cell, data,  dtype=tf.float32)
 		output_layer = tf.add(tf.matmul(output[-1], self.output_layer["weight"]), self.output_layer["biases"])
 
 		return output_layer
@@ -65,7 +66,7 @@ class NeuralNetwork:
 						epoch_x, epoch_y = mnist.train.next_batch(self.batch_size)
 					else:
 						epoch_x, epoch_y = mnist_own.train_next_batch(self.batch_size)
-						epoch_x = epoch_x.reshape(self.batch_size, self.n_chunk, self.chunk_size)
+						epoch_x = np.array(epoch_x).reshape(self.batch_size, self.n_chunk, self.chunk_size)
 					_, c = sess.run([optimizer, cost], feed_dict={self.x: epoch_x, self.y: epoch_y})
 
 					loss_epoch += c
@@ -77,6 +78,7 @@ class NeuralNetwork:
 				if data_collection is None:
 					print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))
 				else:
+					list_data_train_x = mnist_own.get_test_data()[0]
 					print (
 						"Epoch: %d Loss Epoch: %d, Acurracy: %f" %
-						(epoch, loss_epoch, accuracy.eval({self.x: mnist_own.get_test_data()[0].reshape(self.batch_size, self.n_chunk, self.chunk_size), self.y: mnist_own.get_test_data()[1]})))
+						(epoch, loss_epoch, accuracy.eval({self.x: np.asarray(list_data_train_x).reshape(len(list_data_train_x), self.n_chunk, self.chunk_size), self.y: mnist_own.get_test_data()[1]})))
