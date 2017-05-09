@@ -11,3 +11,4 @@ This project consist of 2 main process:
   - Modelling Algortihm tried:
     - Deep Neural Network
     - Recursive Neural Network
+    - Convolutional neural network
