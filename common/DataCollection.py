@@ -1,13 +1,14 @@
 import os
 import numpy as np
 from skimage import io
+from skimage.transform import resize
 import pickle
 
 # put general function that could be used by other model later
 
 
 def transform_image_path_to_one_dimensional_matrices(image_path):
-	image_in_pixel = np.resize(io.imread(image_path), (1, 45*45))[0]
+	image_in_pixel = np.resize(resize(io.imread(image_path), (28,28)), (1, 28*28))[0]
 	image_in_pixel = (image_in_pixel - image_in_pixel.min())/(image_in_pixel.max()-image_in_pixel.min())
 	return image_in_pixel
 
@@ -21,6 +22,7 @@ def generate_one_hot_encoding(result_class, num_class):
 class DataCollection:
 
 	NUM_CLASS = 82
+	LIMIT_PERCENTAGE_SIZE = 0.2
 
 	def __init__(self, image_directory=None):
 
@@ -58,22 +60,21 @@ class DataCollection:
 		for key, value in self.data_directory.iteritems():
 			# 80% is for training
 			# need to resize the image into 1 dimensional image
-			directory_size = int(len(value) * 0.8)
+			limit_size = int(len(value)*self.LIMIT_PERCENTAGE_SIZE)
+			directory_size = int(limit_size * 0.8)
 			one_hot_label = self.label_one_hot_encoding.get(key)
 
 			for i in range(directory_size):
 				single_image_path = value[i]
 				image_in_pixel = transform_image_path_to_one_dimensional_matrices(single_image_path)
-				if len(image_in_pixel) != 2025:
-					continue
 				self.data_train_x.append(image_in_pixel)
 				self.data_train_y.append(one_hot_label)
 
-			for i in range(directory_size, len(value)):
+			for i in range(directory_size, limit_size):
 				self.data_test_x.append(transform_image_path_to_one_dimensional_matrices(value[i]))
 				self.data_test_y.append(one_hot_label)
 
-			print ("Finish Collecting data for key %s size %d" % (key, len(value)))
+			print ("Finish Collecting data for key %s size %d" % (key, limit_size))
 
 		self.start_index = 0
 
