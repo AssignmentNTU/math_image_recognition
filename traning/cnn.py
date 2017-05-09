@@ -8,10 +8,10 @@ class NeuralNetwork:
 
 	# 82 classification
 	output_classes = 82
-	batch_size = 128
-	image_width = 45
-	image_height = 45
-	input_class = 45*45
+	batch_size = 1000
+	image_width = 28
+	image_height = 28
+	input_class = 28*28
 
 	def __init__(self):
 
@@ -28,7 +28,7 @@ class NeuralNetwork:
 
 		# this is normal perceptron layer
 		self.full_connected_1 = {
-			"weight": tf.Variable(tf.random_normal([12*12*64, 1028])),
+			"weight": tf.Variable(tf.random_normal([7*7*64, 1028])),
 			"biases": tf.Variable(tf.random_normal([1028]))
 		}
 
@@ -50,7 +50,7 @@ class NeuralNetwork:
 
 	def neural_network_model(self):
 		data = self.x
-		data = tf.reshape(data, shape=[-1, 45, 45, 1])
+		data = tf.reshape(data, shape=[-1, self.image_width, self.image_height, 1])
 		# activation function essentially just  x = 0 if x < 0 else x
 		conv1 = self.conv2d(x=data, weight=self.convolutional_1.get("weight"), biases=self.convolutional_1.get("biases"))
 		conv1 = self.max_pooling(conv1)
@@ -58,7 +58,7 @@ class NeuralNetwork:
 		conv2 = self.conv2d(x=conv1, weight=self.convolutional_2.get("weight"), biases=self.convolutional_2.get("biases"))
 		conv2 = self.max_pooling(conv2)
 
-		data = tf.reshape(conv2, [-1, 12*12*64])
+		data = tf.reshape(conv2, [-1, 7*7*64])
 		fc1 = tf.add(tf.matmul(data, self.full_connected_1.get("weight")), self.full_connected_1.get("biases"))
 		fc1 = tf.nn.relu(fc1)
 
@@ -92,18 +92,19 @@ class NeuralNetwork:
 				else:
 					limit_range = num_data
 
-				for _ in range(int(limit_range/self.batch_size)):
+				for index in range(int(limit_range/self.batch_size)):
 					if data_collection is None:
 						epoch_x, epoch_y = mnist.train.next_batch(self.batch_size)
 					else:
 						epoch_x, epoch_y = mnist_own.train_next_batch(self.batch_size)
 					_, c = sess.run([optimizer, cost], feed_dict={self.x: epoch_x, self.y: epoch_y})
-
+					print("index count: %d, loss_epoch: %d" % (index, loss_epoch))
 					loss_epoch += c
 
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
 				accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-				data_collection.restart_the_start_index()
+				if data_collection is None:
+					data_collection.restart_the_start_index()
 
 				if data_collection is None:
 					print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))

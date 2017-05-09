@@ -80,14 +80,14 @@ class NeuralNetwork:
 				else:
 					limit_range = num_data
 
-				for _ in range(int(limit_range/self.batch_size)):
+				for index in range(int(limit_range/self.batch_size)):
 					if data_collection is None:
 						epoch_x, epoch_y = mnist.train.next_batch(self.batch_size)
 					else:
 						epoch_x, epoch_y = mnist_own.train_next_batch(self.batch_size)
 
 					_, c = sess.run([optimizer, cost], feed_dict={self.x: epoch_x, self.y: epoch_y})
-
+					print("index count: %d, loss_epoch: %d" % (index, loss_epoch))
 					loss_epoch += c
 
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
