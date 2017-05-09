@@ -1,6 +1,6 @@
 from common.ImageSegmentor import Segmentor
 from common.GradientImageSegmentor import ImageSegmentor
-from traning.rnn import NeuralNetwork
+from traning.cnn import NeuralNetwork
 from common.DataCollection import DataCollection
 
 TRAINING_DATA_PATH = "img/extracted_images"

@@ -64,7 +64,7 @@ class NeuralNetwork:
 		else:
 			mnist_own = data_collection
 
-		hm_epoc = 10
+		hm_epoc = 100
 
 		# how many time we want to re-loop the training
 
