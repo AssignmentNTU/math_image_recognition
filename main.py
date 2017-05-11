@@ -13,7 +13,7 @@ if __name__ == "__main__":
 	# image_segmentor = ImageSegmentor("img/test1.jpg")
 	# image_segmentor.start_dsu_image_segmenting()
 
-	data_collection = DataCollection(image_directory=TRAINING_DATA_PATH)
+	data_collection = DataCollection(image_directory=None)
 	num_data = data_collection.init_train_data()
 	data_collection.init_test_data()
 	print("num_data: %d" % num_data)

@@ -69,7 +69,8 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer().minimize(cost)
+		adam_optimizer = tf.train.AdamOptimizer(learning_rate=0.01)
+		optimizer = adam_optimizer.minimize(cost)
 
 		if data_collection is None:
 			mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
@@ -103,7 +104,7 @@ class NeuralNetwork:
 
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
 				accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-				if data_collection is None:
+				if data_collection is not None:
 					data_collection.restart_the_start_index()
 
 				if data_collection is None:
