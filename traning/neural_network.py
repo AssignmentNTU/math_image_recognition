@@ -9,14 +9,14 @@ class NeuralNetwork:
 	number_node_2 = 500
 	number_node_3 = 500
 	# 82 classification
-	output_classes = 82
-	batch_size = 1000
+	output_classes = 10
+	batch_size = 100
 
 	def __init__(self):
 		# basically the ide
 
 		self.hidden_layer_1 = {
-			"weight": tf.Variable(tf.random_normal([2025, self.number_node_1])),
+			"weight": tf.Variable(tf.random_normal([28*28, self.number_node_1])),
 			"biases": tf.Variable(tf.random_normal([self.number_node_1]))
 		}
 
@@ -35,7 +35,7 @@ class NeuralNetwork:
 			"biases": tf.Variable(tf.random_normal([self.output_classes]))
 		}
 
-		self.x = tf.placeholder('float', [None, 2025])
+		self.x = tf.placeholder('float', [None, 28*28])
 		self.y = tf.placeholder('float')
 
 	def neural_network_model(self):
@@ -57,7 +57,7 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer().minimize(cost)
+		optimizer = tf.train.AdamOptimizer(learning_rate=0.01).minimize(cost)
 
 		if data_collection is None:
 			mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
@@ -92,7 +92,8 @@ class NeuralNetwork:
 
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
 				accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-				data_collection.restart_the_start_index()
+				if data_collection is not None:
+					data_collection.restart_the_start_index()
 
 				if data_collection is None:
 					print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))

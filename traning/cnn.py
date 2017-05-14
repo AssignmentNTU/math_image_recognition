@@ -7,7 +7,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 class NeuralNetwork:
 
 	# 82 classification
-	output_classes = 82
+	output_classes = 10
 	batch_size = 128
 	image_width = 28
 	image_height = 28
@@ -21,10 +21,9 @@ class NeuralNetwork:
 			"biases": tf.Variable(tf.random_normal([32]))
 		}
 
-		self.convolutional_2 = {
-			"weight": tf.Variable(tf.random_normal([5, 5, 32, 64])),
-			"biases": tf.Variable(tf.random_normal([64]))
-		}
+		self.normal_ = {"weight": tf.Variable(tf.random_normal([5, 5, 32, 64])),
+						"biases": tf.Variable(tf.random_normal([64]))}
+		self.convolutional_2 = self.normal_
 
 		# this is normal perceptron layer
 		self.full_connected_1 = {
@@ -69,14 +68,14 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer().minimize(cost)
+		optimizer = tf.train.AdamOptimizer(learning_rate=0.1).minimize(cost)
 
 		if data_collection is None:
 			mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
 		else:
 			mnist_own = data_collection
 
-		hm_epoc = 10
+		hm_epoc = 100
 
 		# how many time we want to re-loop the training
 
@@ -103,7 +102,8 @@ class NeuralNetwork:
 
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
 				accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-				data_collection.restart_the_start_index()
+				if data_collection is not None:
+					data_collection.restart_the_start_index()
 
 				if data_collection is None:
 					print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))
