@@ -8,7 +8,7 @@ class NeuralNetwork:
 
 	# 82 classification
 	output_classes = 10
-	batch_size = 128
+	batch_size = 1000
 	image_width = 28
 	image_height = 28
 	input_class = 28*28
@@ -68,7 +68,7 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer(learning_rate=0.1).minimize(cost)
+		optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
 		if data_collection is None:
 			mnist = input_data.read_data_sets("/tmp/data", one_hot=True)

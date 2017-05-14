@@ -22,7 +22,11 @@ def generate_one_hot_encoding(result_class, num_class):
 class DataCollection:
 
 	NUM_CLASS = 82
-	LIMIT_PERCENTAGE_SIZE = 0.2
+	LIMIT_PERCENTAGE_SIZE = 0.5
+
+	LIMIT_PERCENTAGE_VALIDATION = 0.2
+	LIMIT_PERCENTAGE_TRAIN = 0.7
+	LIMIT_PERCENTAGE_TEST = 0.3
 
 	def __init__(self, image_directory=None):
 
@@ -34,6 +38,8 @@ class DataCollection:
 		self.data_directory = {}
 		self.data_train_x = []
 		self.data_train_y = []
+		self.data_validation_x = []
+		self.data_validation_y = []
 		self.data_test_x = []
 		self.data_test_y = []
 
@@ -61,7 +67,8 @@ class DataCollection:
 			# 80% is for training
 			# need to resize the image into 1 dimensional image
 			limit_size = int(len(value)*self.LIMIT_PERCENTAGE_SIZE)
-			directory_size = int(limit_size * 0.8)
+			directory_size = int(limit_size * self.LIMIT_PERCENTAGE_TRAIN)
+			validation_directory_size = int(limit_size * self.LIMIT_PERCENTAGE_VALIDATION)
 			one_hot_label = self.label_one_hot_encoding.get(key)
 
 			for i in range(directory_size):
@@ -69,6 +76,12 @@ class DataCollection:
 				image_in_pixel = transform_image_path_to_one_dimensional_matrices(single_image_path)
 				self.data_train_x.append(image_in_pixel)
 				self.data_train_y.append(one_hot_label)
+
+			for i in range(validation_directory_size):
+				single_image_path = value[i]
+				image_in_pixel = transform_image_path_to_one_dimensional_matrices(single_image_path)
+				self.data_validation_x.append(image_in_pixel)
+				self.data_validation_y.append(one_hot_label)
 
 			for i in range(directory_size, limit_size):
 				self.data_test_x.append(transform_image_path_to_one_dimensional_matrices(value[i]))
@@ -92,6 +105,12 @@ class DataCollection:
 		with open("data_test_y.pickle", "wb") as handle:
 			pickle.dump(self.data_test_y, handle)
 
+		with open("data_validation_x.pickle", "wb") as handle:
+			pickle.dump(self.data_validation_x, handle)
+
+		with open("data_validation_y.pickle", "wb") as handle:
+			pickle.dump(self.data_validation_y, handle)
+
 		return
 
 	def init_train_data(self):
@@ -114,6 +133,14 @@ class DataCollection:
 		with open("data_test_y.pickle", "rb") as handle:
 			self.data_test_y = pickle.load(handle)
 
+	def init_validation_data(self):
+
+		with open("data_validation_x.pickle", "wb") as handle:
+			self.data_validation_x = pickle.load(handle)
+
+		with open("data_validation_y.pickle", "wb") as handle:
+			self.data_validation_y = pickle.load(handle)
+
 	def train_next_batch(self, batch_size):
 
 		last_index = self.start_index + batch_size
@@ -127,3 +154,6 @@ class DataCollection:
 
 	def get_test_data(self):
 		return self.data_test_x, self.data_test_y
+
+	def get_validation_data(self):
+		return self.data_validation_x, self.data_validation_y

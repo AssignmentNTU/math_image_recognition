@@ -95,9 +95,16 @@ class NeuralNetwork:
 				if data_collection is not None:
 					data_collection.restart_the_start_index()
 
+				# for validation just for own mnist data
+				if data_collection is not None:
+					print (
+						"Validation: Epoch: %d Loss Epoch: %d, Acurracy: %f" %
+						(epoch, loss_epoch,
+							accuracy.eval({self.x: mnist_own.get_validation_data()[0], self.y: mnist_own.get_validation_data()[1]})))
+
 				if data_collection is None:
 					print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))
 				else:
 					print (
-						"Epoch: %d Loss Epoch: %d, Acurracy: %f" %
+						"Loss: Epoch: %d Loss Epoch: %d, Acurracy: %f" %
 						(epoch, loss_epoch, accuracy.eval({self.x: mnist_own.get_test_data()[0], self.y: mnist_own.get_test_data()[1]})))
