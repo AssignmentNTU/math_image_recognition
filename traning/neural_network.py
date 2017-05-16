@@ -9,7 +9,7 @@ class NeuralNetwork:
 	number_node_2 = 500
 	number_node_3 = 500
 	# 82 classification
-	output_classes = 10
+	output_classes = 82
 	batch_size = 100
 
 	def __init__(self):
@@ -57,14 +57,15 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer(learning_rate=0.01).minimize(cost)
+		optimizer = tf.train.AdamOptimizer().minimize(cost)
+		saver = tf.train.Saver()
 
 		if data_collection is None:
 			mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
 		else:
 			mnist_own = data_collection
 
-		hm_epoc = 100
+		hm_epoc = 1000
 
 		# how many time we want to re-loop the training
 
@@ -108,3 +109,5 @@ class NeuralNetwork:
 					print (
 						"Loss: Epoch: %d Loss Epoch: %d, Acurracy: %f" %
 						(epoch, loss_epoch, accuracy.eval({self.x: mnist_own.get_test_data()[0], self.y: mnist_own.get_test_data()[1]})))
+
+		saver.save(sess, "save_model.dat")
