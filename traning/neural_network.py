@@ -62,15 +62,15 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(cost)
-		# saver = tf.train.Saver()
+		optimizer = tf.train.AdamOptimizer(learning_rate=0.00001).minimize(cost)
+		saver = tf.train.Saver()
 
 		if data_collection is None:
 			mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
 		else:
 			mnist_own = data_collection
 
-		hm_epoc = 80
+		hm_epoc = 3000
 
 		# how many time we want to re-loop the training
 
@@ -120,4 +120,4 @@ class NeuralNetwork:
 		plt.plot(self.list_time,self.list_accuracy)
 		plt.axis(self.axis)
 		plt.show()
-		# saver.save(sess, "save_model.dat")
+		saver.save(sess, "deep_learning_model", global_step=10000)
