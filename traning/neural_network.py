@@ -1,6 +1,7 @@
 import tensorflow as tf
 # using tensorflow data example
 from tensorflow.examples.tutorials.mnist import input_data
+import matplotlib.pyplot as plt
 
 
 class NeuralNetwork:
@@ -10,13 +11,17 @@ class NeuralNetwork:
 	number_node_3 = 500
 	# 82 classification
 	output_classes = 82
-	batch_size = 1000
+	batch_size = 100
+	pixel_size = 45
 
 	def __init__(self):
 		# basically the ide
+		self.list_accuracy = []
+		self.list_time = []
+		self.axis = [0, 200, 0, 1]
 
 		self.hidden_layer_1 = {
-			"weight": tf.Variable(tf.random_normal([2025, self.number_node_1])),
+			"weight": tf.Variable(tf.random_normal([self.pixel_size*self.pixel_size, self.number_node_1])),
 			"biases": tf.Variable(tf.random_normal([self.number_node_1]))
 		}
 
@@ -35,7 +40,7 @@ class NeuralNetwork:
 			"biases": tf.Variable(tf.random_normal([self.output_classes]))
 		}
 
-		self.x = tf.placeholder('float', [None, 2025])
+		self.x = tf.placeholder('float', [None, self.pixel_size*self.pixel_size])
 		self.y = tf.placeholder('float')
 
 	def neural_network_model(self):
@@ -57,14 +62,15 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer().minimize(cost)
+		optimizer = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(cost)
+		# saver = tf.train.Saver()
 
 		if data_collection is None:
 			mnist = input_data.read_data_sets("/tmp/data", one_hot=True)
 		else:
 			mnist_own = data_collection
 
-		hm_epoc = 100
+		hm_epoc = 80
 
 		# how many time we want to re-loop the training
 
@@ -87,16 +93,31 @@ class NeuralNetwork:
 						epoch_x, epoch_y = mnist_own.train_next_batch(self.batch_size)
 
 					_, c = sess.run([optimizer, cost], feed_dict={self.x: epoch_x, self.y: epoch_y})
-					print("index count: %d, loss_epoch: %d" % (index, loss_epoch))
+					# print("index count: %d, loss_epoch: %d" % (index, loss_epoch))
 					loss_epoch += c
 
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
 				accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-				data_collection.restart_the_start_index()
+				if data_collection is not None:
+					data_collection.restart_the_start_index()
+
+				# for validation just for own mnist data
+				if data_collection is not None:
+					print (
+						"Validation: Epoch: %d Loss Epoch: %d, Acurracy: %f" %
+						(epoch, loss_epoch,
+							accuracy.eval({self.x: mnist_own.get_validation_data()[0], self.y: mnist_own.get_validation_data()[1]})))
 
 				if data_collection is None:
 					print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))
 				else:
+					accuracy_value = accuracy.eval({self.x: mnist_own.get_test_data()[0], self.y: mnist_own.get_test_data()[1]})
 					print (
-						"Epoch: %d Loss Epoch: %d, Acurracy: %f" %
-						(epoch, loss_epoch, accuracy.eval({self.x: mnist_own.get_test_data()[0], self.y: mnist_own.get_test_data()[1]})))
+						"Loss: Epoch: %d Loss Epoch: %d, Acurracy: %f" %
+						(epoch, loss_epoch, accuracy_value))
+					self.list_time.append(epoch)
+					self.list_accuracy.append(accuracy_value)
+		plt.plot(self.list_time,self.list_accuracy)
+		plt.axis(self.axis)
+		plt.show()
+		# saver.save(sess, "save_model.dat")

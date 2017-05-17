@@ -8,7 +8,7 @@ import pickle
 
 
 def transform_image_path_to_one_dimensional_matrices(image_path):
-	image_in_pixel = np.resize(resize(io.imread(image_path), (28, 28), mode='reflect'), (1, 28*28))[0]
+	image_in_pixel = np.resize(io.imread(image_path), (1, 45*45))[0]
 	image_in_pixel = (image_in_pixel - image_in_pixel.min())/(image_in_pixel.max()-image_in_pixel.min())
 	return image_in_pixel
 
@@ -21,8 +21,12 @@ def generate_one_hot_encoding(result_class, num_class):
 
 class DataCollection:
 
-	percent_train = 0.2
 	NUM_CLASS = 82
+	LIMIT_PERCENTAGE_SIZE = 1
+
+	LIMIT_PERCENTAGE_VALIDATION = 0.2
+	LIMIT_PERCENTAGE_TRAIN = 0.9
+	LIMIT_PERCENTAGE_TEST = 0.1
 
 	def __init__(self, image_directory=None):
 
@@ -34,6 +38,8 @@ class DataCollection:
 		self.data_directory = {}
 		self.data_train_x = []
 		self.data_train_y = []
+		self.data_validation_x = []
+		self.data_validation_y = []
 		self.data_test_x = []
 		self.data_test_y = []
 
@@ -44,9 +50,11 @@ class DataCollection:
 		self.label_one_hot_encoding = {}
 
 		index_label = 0
-		num_class = len(list_directory)
+		num_class = self.NUM_CLASS
 
 		for label in list_directory:
+			if index_label == num_class:
+				break
 			image_directory_path = image_directory + "/" + label
 			for image_path in os.listdir(image_directory_path):
 				if self.data_directory.get(label) is None:
@@ -56,32 +64,37 @@ class DataCollection:
 			index_label += 1
 
 		# will break the dictionary of data to the list which will be trained and tested
-
+		count_num_class = 0
 		for key, value in self.data_directory.iteritems():
+			if count_num_class == self.NUM_CLASS:
+				break
+
+			count_num_class += 1
+
 			# 80% is for training
 			# need to resize the image into 1 dimensional image
-
-			size_directoty_used = int(len(value)*self.percent_train)
-
-			directory_size = int(size_directoty_used * 0.8)
+			limit_size = int(len(value)*self.LIMIT_PERCENTAGE_SIZE)
+			directory_size = int(limit_size * self.LIMIT_PERCENTAGE_TRAIN)
+			validation_directory_size = int(limit_size * self.LIMIT_PERCENTAGE_VALIDATION)
 			one_hot_label = self.label_one_hot_encoding.get(key)
 
 			for i in range(directory_size):
 				single_image_path = value[i]
 				image_in_pixel = transform_image_path_to_one_dimensional_matrices(single_image_path)
-				if len(image_in_pixel) != 28*28:
-					continue
 				self.data_train_x.append(image_in_pixel)
 				self.data_train_y.append(one_hot_label)
 
-			for i in range(directory_size, size_directoty_used):
-				image_in_pixel = transform_image_path_to_one_dimensional_matrices(value[i])
-				if len(image_in_pixel) != 28*28:
-					continue
-				self.data_test_x.append(image_in_pixel)
+			for i in range(validation_directory_size):
+				single_image_path = value[i]
+				image_in_pixel = transform_image_path_to_one_dimensional_matrices(single_image_path)
+				self.data_validation_x.append(image_in_pixel)
+				self.data_validation_y.append(one_hot_label)
+
+			for i in range(directory_size, limit_size):
+				self.data_test_x.append(transform_image_path_to_one_dimensional_matrices(value[i]))
 				self.data_test_y.append(one_hot_label)
 
-			print ("Finish Collecting data for key %s size %d" % (key, len(value)))
+			print ("Finish Collecting data for key %s size %d" % (key, limit_size))
 
 		self.start_index = 0
 
@@ -98,6 +111,12 @@ class DataCollection:
 
 		with open("data_test_y.pickle", "wb") as handle:
 			pickle.dump(self.data_test_y, handle)
+
+		with open("data_validation_x.pickle", "wb") as handle:
+			pickle.dump(self.data_validation_x, handle)
+
+		with open("data_validation_y.pickle", "wb") as handle:
+			pickle.dump(self.data_validation_y, handle)
 
 		return
 
@@ -121,6 +140,14 @@ class DataCollection:
 		with open("data_test_y.pickle", "rb") as handle:
 			self.data_test_y = pickle.load(handle)
 
+	def init_validation_data(self):
+
+		with open("data_validation_x.pickle", "rb") as handle:
+			self.data_validation_x = pickle.load(handle)
+
+		with open("data_validation_y.pickle", "rb") as handle:
+			self.data_validation_y = pickle.load(handle)
+
 	def train_next_batch(self, batch_size):
 
 		last_index = self.start_index + batch_size
@@ -134,3 +161,6 @@ class DataCollection:
 
 	def get_test_data(self):
 		return self.data_test_x, self.data_test_y
+
+	def get_validation_data(self):
+		return self.data_validation_x, self.data_validation_y
