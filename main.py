@@ -3,7 +3,7 @@ from common.GradientImageSegmentor import ImageSegmentor
 from traning.neural_network import NeuralNetwork
 from common.DataCollection import DataCollection
 
-TRAINING_DATA_PATH = "data_training/extracted_images"
+TRAINING_DATA_PATH = "img/extracted_images"
 IMAGE_FILE_NAME = "image_test.png"
 
 if __name__ == "__main__":

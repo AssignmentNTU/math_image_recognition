@@ -8,7 +8,7 @@ import pickle
 
 
 def transform_image_path_to_one_dimensional_matrices(image_path):
-	image_in_pixel = np.resize(resize(io.imread(image_path), (28,28)), (1, 28*28))[0]
+	image_in_pixel = np.resize(io.imread(image_path), (1, 45*45))[0]
 	image_in_pixel = (image_in_pixel - image_in_pixel.min())/(image_in_pixel.max()-image_in_pixel.min())
 	return image_in_pixel
 
@@ -22,11 +22,11 @@ def generate_one_hot_encoding(result_class, num_class):
 class DataCollection:
 
 	NUM_CLASS = 82
-	LIMIT_PERCENTAGE_SIZE = 0.1
+	LIMIT_PERCENTAGE_SIZE = 1
 
 	LIMIT_PERCENTAGE_VALIDATION = 0.2
-	LIMIT_PERCENTAGE_TRAIN = 0.7
-	LIMIT_PERCENTAGE_TEST = 0.3
+	LIMIT_PERCENTAGE_TRAIN = 0.9
+	LIMIT_PERCENTAGE_TEST = 0.1
 
 	def __init__(self, image_directory=None):
 
@@ -50,9 +50,11 @@ class DataCollection:
 		self.label_one_hot_encoding = {}
 
 		index_label = 0
-		num_class = len(list_directory)
+		num_class = self.NUM_CLASS
 
 		for label in list_directory:
+			if index_label == num_class:
+				break
 			image_directory_path = image_directory + "/" + label
 			for image_path in os.listdir(image_directory_path):
 				if self.data_directory.get(label) is None:
@@ -62,8 +64,13 @@ class DataCollection:
 			index_label += 1
 
 		# will break the dictionary of data to the list which will be trained and tested
-
+		count_num_class = 0
 		for key, value in self.data_directory.iteritems():
+			if count_num_class == self.NUM_CLASS:
+				break
+
+			count_num_class += 1
+
 			# 80% is for training
 			# need to resize the image into 1 dimensional image
 			limit_size = int(len(value)*self.LIMIT_PERCENTAGE_SIZE)

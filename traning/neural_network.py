@@ -1,6 +1,7 @@
 import tensorflow as tf
 # using tensorflow data example
 from tensorflow.examples.tutorials.mnist import input_data
+import matplotlib.pyplot as plt
 
 
 class NeuralNetwork:
@@ -11,12 +12,16 @@ class NeuralNetwork:
 	# 82 classification
 	output_classes = 82
 	batch_size = 100
+	pixel_size = 45
 
 	def __init__(self):
 		# basically the ide
+		self.list_accuracy = []
+		self.list_time = []
+		self.axis = [0, 200, 0, 1]
 
 		self.hidden_layer_1 = {
-			"weight": tf.Variable(tf.random_normal([28*28, self.number_node_1])),
+			"weight": tf.Variable(tf.random_normal([self.pixel_size*self.pixel_size, self.number_node_1])),
 			"biases": tf.Variable(tf.random_normal([self.number_node_1]))
 		}
 
@@ -35,7 +40,7 @@ class NeuralNetwork:
 			"biases": tf.Variable(tf.random_normal([self.output_classes]))
 		}
 
-		self.x = tf.placeholder('float', [None, 28*28])
+		self.x = tf.placeholder('float', [None, self.pixel_size*self.pixel_size])
 		self.y = tf.placeholder('float')
 
 	def neural_network_model(self):
@@ -57,7 +62,7 @@ class NeuralNetwork:
 	def start_training(self, num_data, data_collection=None):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
-		optimizer = tf.train.AdamOptimizer().minimize(cost)
+		optimizer = tf.train.AdamOptimizer(learning_rate=0.00001).minimize(cost)
 		saver = tf.train.Saver()
 
 		if data_collection is None:
@@ -65,7 +70,7 @@ class NeuralNetwork:
 		else:
 			mnist_own = data_collection
 
-		hm_epoc = 1000
+		hm_epoc = 3000
 
 		# how many time we want to re-loop the training
 
@@ -81,14 +86,14 @@ class NeuralNetwork:
 				else:
 					limit_range = num_data
 
-				for _ in range(int(limit_range/self.batch_size)):
+				for index in range(int(limit_range/self.batch_size)):
 					if data_collection is None:
 						epoch_x, epoch_y = mnist.train.next_batch(self.batch_size)
 					else:
 						epoch_x, epoch_y = mnist_own.train_next_batch(self.batch_size)
 
 					_, c = sess.run([optimizer, cost], feed_dict={self.x: epoch_x, self.y: epoch_y})
-
+					# print("index count: %d, loss_epoch: %d" % (index, loss_epoch))
 					loss_epoch += c
 
 				correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(self.y, 1))
@@ -106,8 +111,13 @@ class NeuralNetwork:
 				if data_collection is None:
 					print ("Epoch: %d Loss Epoch: %d, Acurracy: %f" % (epoch, loss_epoch,  accuracy.eval({self.x: mnist.test.images, self.y: mnist.test.labels})))
 				else:
+					accuracy_value = accuracy.eval({self.x: mnist_own.get_test_data()[0], self.y: mnist_own.get_test_data()[1]})
 					print (
 						"Loss: Epoch: %d Loss Epoch: %d, Acurracy: %f" %
-						(epoch, loss_epoch, accuracy.eval({self.x: mnist_own.get_test_data()[0], self.y: mnist_own.get_test_data()[1]})))
-
-		saver.save(sess, "save_model.dat")
+						(epoch, loss_epoch, accuracy_value))
+					self.list_time.append(epoch)
+					self.list_accuracy.append(accuracy_value)
+		plt.plot(self.list_time,self.list_accuracy)
+		plt.axis(self.axis)
+		plt.show()
+		saver.save(sess, "deep_learning_model", global_step=10000)
