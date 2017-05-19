@@ -22,7 +22,7 @@ def generate_one_hot_encoding(result_class, num_class):
 class DataCollection:
 
 	NUM_CLASS = 82
-	LIMIT_PERCENTAGE_SIZE = 0.5
+	LIMIT_PERCENTAGE_SIZE = 0.1
 
 	LIMIT_PERCENTAGE_VALIDATION = 0.2
 	LIMIT_PERCENTAGE_TRAIN = 0.7
@@ -135,10 +135,10 @@ class DataCollection:
 
 	def init_validation_data(self):
 
-		with open("data_validation_x.pickle", "wb") as handle:
+		with open("data_validation_x.pickle", "rb") as handle:
 			self.data_validation_x = pickle.load(handle)
 
-		with open("data_validation_y.pickle", "wb") as handle:
+		with open("data_validation_y.pickle", "rb") as handle:
 			self.data_validation_y = pickle.load(handle)
 
 	def train_next_batch(self, batch_size):
