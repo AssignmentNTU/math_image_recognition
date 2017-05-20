@@ -17,6 +17,8 @@ class Segmentor:
 
 	def start_segmenting_image(self, file_image_part):
 
+		list_file_name = []
+
 		image = io.imread(file_image_part)
 		image_pil = Image.open(file_image_part)
 		result_boundaries = find_boundaries(image, mode='outer').astype(np.uint8)
@@ -83,8 +85,10 @@ class Segmentor:
 		min_y = min(list_y)
 		max_y = max(list_y)
 
-		image_part = image_pil.crop((min_x, min_y, max_x, max_y ))
-		image_part.save("image_"+str(number_part)+".png")
+		image_part = image_pil.crop((min_x, min_y, max_x, max_y))
+		file_name_part = file_image_part+"_"+str(number_part)+".png"
+		list_file_name.append(file_name_part)
+		image_part.save(file_name_part)
 
 	def check_number_one(self, list_data):
 		# include all the alpha
