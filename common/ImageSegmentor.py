@@ -43,7 +43,7 @@ class Segmentor:
 						gap = True
 				# this is RGB value
 				elif len(image.shape) == 3:
-					if 1 in result_boundaries[j][i]:
+					if self.check_number_one(result_boundaries[j][i]):
 						list_y.append(j)
 						list_x.append(i)
 						gap = True
@@ -85,3 +85,18 @@ class Segmentor:
 
 		image_part = image_pil.crop((min_x, min_y, max_x, max_y ))
 		image_part.save("image_"+str(number_part)+".png")
+
+	def check_number_one(self, list_data):
+		# include all the alpha
+		if len(list_data) == 4:
+
+			for i in range(len(list_data)-1):
+				if list_data[i] == 1:
+					return True
+			return False
+		else:
+
+			if 1 in list_data:
+				return True
+			else:
+				return False

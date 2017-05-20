@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, request, redirect, url_for
 
-from .translate.ImageTranslatorManager import ImageTranslatorManager
+from api.translate.ImageTranslatorManager import ImageTranslatorManager
 
 application = Flask(__name__)
 
