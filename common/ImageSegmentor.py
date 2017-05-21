@@ -15,11 +15,15 @@ class Segmentor:
 	def __init__(self):
 		return
 
-	def start_segmenting_image(self, file_image_part):
+	def start_segmenting_image(self, file_image_part, pass_image_name=True):
 
 		list_file_name = []
 
-		image = io.imread(file_image_part)
+		if pass_image_name:
+			image = io.imread(file_image_part)
+		else:
+			image = file_image_part
+
 		image_pil = Image.open(file_image_part)
 		result_boundaries = find_boundaries(image, mode='outer').astype(np.uint8)
 
