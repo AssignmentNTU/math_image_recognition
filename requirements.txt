@@ -1,3 +1,5 @@
 scikit-image
 tensorflow
 hdf5=1.8.17
+flask
+gunicorn
