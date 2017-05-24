@@ -20,6 +20,8 @@ class ImageTranslatorManager:
             file.close()
             image_transparator = ImageTransparater()
             full_path_name = "/Users/edwardsujono/Python_Project/math_image_recognition/upload_image/" + encrypted_file_name
+            # just for simple logs
+            print("fulle_path_name: %s is being processed" % full_path_name)
             transparent_file_data= image_transparator.start_transforming(full_path_name, return_image=False)
             # transparent file date can be either file name or real file
             # return_image False means the return value would be the filename

@@ -2,6 +2,7 @@ import tensorflow as tf
 # using tensorflow data example
 from tensorflow.examples.tutorials.mnist import input_data
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class NeuralNetwork:
@@ -43,7 +44,9 @@ class NeuralNetwork:
 		self.x = tf.placeholder('float', [None, self.pixel_size*self.pixel_size])
 		self.y = tf.placeholder('float')
 
-	def neural_network_model(self):
+		self.real_input_x = tf.placeholder('float', [self.pixel_size*self.pixel_size])
+
+	def neural_network_model(self, is_real=False):
 		data = self.x
 		# activation function essentially just  x = 0 if x < 0 else x
 		layer_1 = tf.add(tf.matmul(data, self.hidden_layer_1["weight"]), self.hidden_layer_1["biases"])
@@ -121,3 +124,19 @@ class NeuralNetwork:
 		plt.axis(self.axis)
 		plt.show()
 		saver.save(sess, "deep_learning_model", global_step=10000)
+
+	def restore_the_model(self, data_collection):
+		data = None
+		if data_collection is not None:
+			data = [data_collection.get_validation_data()[0][0]]
+
+		prediction = self.neural_network_model(is_real=False)
+		with tf.Session() as session:
+			session.run(tf.global_variables_initializer())
+			saver = tf.train.import_meta_graph('deep_learning_model-2000.meta')
+			saver.restore(session, tf.train.latest_checkpoint('./'))
+			result = session.run(prediction, feed_dict={self.x: data})
+
+		result = np.argmax(result, axis=1)
+		print ("result: %d" % result)
+		return result
