@@ -25,8 +25,9 @@ class ImageTransparater:
                     )
             arr[mask, 3] = 0
             img = Image.fromarray(arr, mode='RGBA')
-            out_image_name = file_name+"_out_transparent.png"
+            out_image_name = self.remove_any_dot_extension(file_name)+"_out_transparent.png"
             img.save(out_image_name)
+            img.close()
             return out_image_name
 
         else:
@@ -43,4 +44,10 @@ class ImageTransparater:
             arr[mask, 3] = 0
             img = Image.fromarray(arr, mode='RGBA')
             return img
+
+    def remove_any_dot_extension(self, full_file_name):
+
+        file_name_without_extension = full_file_name.split(".")[0]
+        return file_name_without_extension
+
 

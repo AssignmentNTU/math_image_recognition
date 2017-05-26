@@ -62,7 +62,7 @@ class NeuralNetwork:
 
 		return output_layer
 
-	def start_training(self, num_data, data_collection=None):
+	def start_training(self, num_data, data_collection=None, from_checkpoint=False):
 		prediction = self.neural_network_model()
 		cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=self.y))
 		optimizer = tf.train.AdamOptimizer(learning_rate=0.00001).minimize(cost)
@@ -80,6 +80,10 @@ class NeuralNetwork:
 		with tf.Session() as sess:
 
 			sess.run(tf.initialize_all_variables())
+
+			if from_checkpoint:
+				saver = tf.train.import_meta_graph('deep_learning_model-2000.meta')
+				saver.restore(sess, tf.train.latest_checkpoint('./'))
 
 			for epoch in range(hm_epoc):
 				loss_epoch = 0
