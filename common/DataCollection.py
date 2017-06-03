@@ -22,7 +22,7 @@ def generate_one_hot_encoding(result_class, num_class):
 class DataCollection:
 
 	NUM_CLASS = 82
-	LIMIT_PERCENTAGE_SIZE = 1
+	LIMIT_PERCENTAGE_SIZE = 0.1
 
 	LIMIT_PERCENTAGE_VALIDATION = 0.2
 	LIMIT_PERCENTAGE_TRAIN = 0.9

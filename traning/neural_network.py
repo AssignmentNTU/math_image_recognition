@@ -133,14 +133,23 @@ class NeuralNetwork:
 		data = None
 		if data_collection is not None:
 			data = [data_collection.get_validation_data()[0][0]]
-
+		# self.print_sample_data(data)
 		prediction = self.neural_network_model(is_real=False)
+		saver = tf.train.Saver()
 		with tf.Session() as session:
-			session.run(tf.global_variables_initializer())
-			saver = tf.train.import_meta_graph('deep_learning_model-2000.meta')
+
+			# saver = tf.train.import_meta_graph('deep_learning_model-2000.meta')
 			saver.restore(session, tf.train.latest_checkpoint('./'))
+			# session.run(tf.global_variables_initializer())
 			result = session.run(prediction, feed_dict={self.x: data})
 
 		result = np.argmax(result, axis=1)
 		print ("result: %d" % result)
 		return result
+
+	def print_sample_data(self, data_array):
+		data_array = data_array[0]
+		for data in data_array:
+			print (data)
+
+		print("\n")

@@ -4,6 +4,7 @@ import thread
 from common.ImageTransparator import ImageTransparater
 from common.ImageSegmentor import Segmentor
 
+
 class ImageTranslatorManager:
 
     def __init__(self):
