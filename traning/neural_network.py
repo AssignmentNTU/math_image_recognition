@@ -129,10 +129,10 @@ class NeuralNetwork:
 		plt.show()
 		saver.save(sess, "deep_learning_model", global_step=10000)
 
-	def restore_the_model(self, data_collection):
-		data = None
-		if data_collection is not None:
-			data = [data_collection.get_validation_data()[0][0]]
+	def restore_the_model(self, data, is_data_collection=True):
+
+		if is_data_collection:
+			data = [data.get_validation_data()[0][0]]
 		# self.print_sample_data(data)
 		prediction = self.neural_network_model(is_real=False)
 		saver = tf.train.Saver()
@@ -144,7 +144,7 @@ class NeuralNetwork:
 			result = session.run(prediction, feed_dict={self.x: data})
 
 		result = np.argmax(result, axis=1)
-		print ("result: %d" % result)
+		# print ("result: %d" % result)
 		return result
 
 	def print_sample_data(self, data_array):

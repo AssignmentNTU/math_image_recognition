@@ -34,7 +34,7 @@ class ImageTranslatorManager:
     def segmenting_image(self, transparent_file_data):
 
         segmentor = Segmentor()
-        segmentor.start_segmenting_image(transparent_file_data)
+        list_file_name  = segmentor.start_segmenting_image(transparent_file_data)
 
     def get_file_name_extension(self, file_data):
         file_name = file_data.filename

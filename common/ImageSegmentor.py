@@ -2,7 +2,7 @@ import numpy as np
 from skimage.segmentation import find_boundaries, mark_boundaries
 from skimage import io
 from PIL import Image
-
+from ImageTranslator import ImageTranslator
 # This class will brute force the image contour and crop it
 
 
@@ -17,7 +17,7 @@ class Segmentor:
 
 	def start_segmenting_image(self, file_image_part, pass_image_name=True):
 
-		list_file_name = []
+		list_result = []
 
 		if pass_image_name:
 			image = io.imread(file_image_part)
@@ -71,7 +71,7 @@ class Segmentor:
 				max_y = max(list_y)
 
 				image_part = image_pil.crop((min_x, min_y, max_x, max_y ))
-				image_part.save("image_"+str(number_part)+".png")
+				list_result.append(ImageTranslator.translate_image_to_string(image_part))
 
 				number_part += 1
 
@@ -90,9 +90,9 @@ class Segmentor:
 		max_y = max(list_y)
 
 		image_part = image_pil.crop((min_x, min_y, max_x, max_y))
-		file_name_part = file_image_part+"_"+str(number_part)+".png"
-		list_file_name.append(file_name_part)
-		image_part.save(file_name_part)
+		list_result.append(ImageTranslator.translate_image_to_string(image_part))
+
+		return list_result
 
 	def check_number_one(self, list_data):
 		# include all the alpha

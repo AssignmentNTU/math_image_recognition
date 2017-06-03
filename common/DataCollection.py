@@ -7,8 +7,8 @@ import pickle
 # put general function that could be used by other model later
 
 
-def transform_image_path_to_one_dimensional_matrices(image_path):
-	image_in_pixel = np.resize(io.imread(image_path), (1, 45*45))[0]
+def transform_image_path_to_one_dimensional_matrices(image_path, use_image_path=True):
+	image_in_pixel = np.resize(io.imread(image_path) if use_image_path else image_path, (1, 45*45))[0]
 	image_in_pixel = (image_in_pixel - image_in_pixel.min())/(image_in_pixel.max()-image_in_pixel.min())
 	return image_in_pixel
 
