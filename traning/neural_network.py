@@ -139,13 +139,13 @@ class NeuralNetwork:
 		with tf.Session() as session:
 
 			# saver = tf.train.import_meta_graph('deep_learning_model-2000.meta')
-			saver.restore(session, tf.train.latest_checkpoint('./'))
+			saver.restore(session, tf.train.latest_checkpoint('/Users/edwardsujono/Python_Project/math_image_recognition'))
 			# session.run(tf.global_variables_initializer())
 			result = session.run(prediction, feed_dict={self.x: data})
 
 		result = np.argmax(result, axis=1)
-		# print ("result: %d" % result)
-		return result
+		print ("result: %d" % result)
+		return int(result)
 
 	def print_sample_data(self, data_array):
 		data_array = data_array[0]

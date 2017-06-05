@@ -1,4 +1,5 @@
 import numpy as np
+import uuid
 from skimage.segmentation import find_boundaries, mark_boundaries
 from skimage import io
 from PIL import Image
@@ -11,6 +12,7 @@ class Segmentor:
 	# LIMIT NUMBER GAP MEANS THAT TOTAL COLUMN 0
 	# IN THE IMAGE
 	LIMIT_NUMBER_GAP = 1
+	DIRECTORY_PATH = "/Users/edwardsujono/Python_Project/math_image_recognition/api/"
 
 	def __init__(self):
 		return
@@ -18,7 +20,7 @@ class Segmentor:
 	def start_segmenting_image(self, file_image_part, pass_image_name=True):
 
 		list_result = []
-
+		image_translator = ImageTranslator()
 		if pass_image_name:
 			image = io.imread(file_image_part)
 		else:
@@ -36,6 +38,8 @@ class Segmentor:
 		number_gap = 0
 		number_part = 0
 
+		get_pixel_start = False
+
 		for i in range(x_range):
 			# gap means that it is different segment of image
 			gap = False
@@ -48,13 +52,14 @@ class Segmentor:
 						list_x.append(i)
 						gap = True
 				# this is RGB value
-				elif len(image.shape) == 3:
-					if self.check_number_one(result_boundaries[j][i]):
+				else:
+					if self.check_black(image[j][i]):
 						list_y.append(j)
 						list_x.append(i)
+						get_pixel_start = True
 						gap = True
 
-			if not gap:
+			if not gap and get_pixel_start:
 				number_gap += 1
 
 			if number_gap == self.LIMIT_NUMBER_GAP:
@@ -70,8 +75,11 @@ class Segmentor:
 				min_y = min(list_y)
 				max_y = max(list_y)
 
-				image_part = image_pil.crop((min_x, min_y, max_x, max_y ))
-				list_result.append(ImageTranslator.translate_image_to_string(image_part))
+				image_part = image_pil.crop((min_x, min_y, max_x, max_y))
+				file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + str(number_part) + ".png"
+				image_part.save(file_save_name)
+				image_part.close()
+				list_result.append(image_translator.translate_image_to_string(file_save_name))
 
 				number_part += 1
 
@@ -81,7 +89,7 @@ class Segmentor:
 			# last one usually there is no gap in between
 
 		if len(list_x) == 0 or len(list_y) == 0:
-			return
+			return list_result
 
 		min_x = min(list_x)
 		max_x = max(list_x)
@@ -90,17 +98,22 @@ class Segmentor:
 		max_y = max(list_y)
 
 		image_part = image_pil.crop((min_x, min_y, max_x, max_y))
-		list_result.append(ImageTranslator.translate_image_to_string(image_part))
+		file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + str(number_part) + ".png"
+		image_part.save(file_save_name)
+		image_part.close()
+		list_result.append(image_translator.translate_image_to_string(file_save_name))
 
 		return list_result
 
-	def check_number_one(self, list_data):
+	def check_black(self, list_data):
 		# include all the alpha
 		if len(list_data) == 4:
 
-			for i in range(len(list_data)-1):
-				if list_data[i] == 1:
-					return True
+			# for i in range(len(list_data)-1):
+			# 	if list_data[i] == 1:
+			# 		return True
+			if list_data[3] == 255:
+				return True
 			return False
 		else:
 

@@ -22,19 +22,19 @@ class ImageTranslatorManager:
             image_transparator = ImageTransparater()
             full_path_name = "/Users/edwardsujono/Python_Project/math_image_recognition/upload_image/" + encrypted_file_name
             # just for simple logs
-            print("fulle_path_name: %s is being processed" % full_path_name)
+            print("full_path_name: %s is being processed" % full_path_name)
             transparent_file_data= image_transparator.start_transforming(full_path_name, return_image=False)
             # transparent file date can be either file name or real file
             # return_image False means the return value would be the filename
-            self.segmenting_image(transparent_file_data=transparent_file_data)
-
-            return {"success": True}
+            list_data = self.segmenting_image(transparent_file_data=transparent_file_data)
+            return {"list_answer": list_data}
         return {"success": False}
 
     def segmenting_image(self, transparent_file_data):
 
         segmentor = Segmentor()
-        list_file_name  = segmentor.start_segmenting_image(transparent_file_data)
+        list_file_name  = segmentor.start_segmenting_image(transparent_file_data, pass_image_name=True)
+        return list_file_name
 
     def get_file_name_extension(self, file_data):
         file_name = file_data.filename
