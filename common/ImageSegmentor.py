@@ -11,8 +11,9 @@ class Segmentor:
 
 	# LIMIT NUMBER GAP MEANS THAT TOTAL COLUMN 0
 	# IN THE IMAGE
-	LIMIT_NUMBER_GAP = 1
-	DIRECTORY_PATH = "/Users/edwardsujono/Python_Project/math_image_recognition/api/"
+	LIMIT_NUMBER_GAP = 10
+	DIRECTORY_PATH = "/home/edwardsujono/Desktop/MachineLearning/cnn/img"
+	LIMIT_BLACK_PIXEL = 50
 
 	def __init__(self):
 		return
@@ -39,7 +40,7 @@ class Segmentor:
 		number_part = 0
 
 		get_pixel_start = False
-
+		count_black_pixel = 0
 		for i in range(x_range):
 			# gap means that it is different segment of image
 			gap = False
@@ -50,20 +51,29 @@ class Segmentor:
 					if result_boundaries[j][i] == 1:
 						list_y.append(j)
 						list_x.append(i)
+						get_pixel_start = True
+						count_black_pixel += 1
 						gap = True
 				# this is RGB value
 				else:
 					if self.check_black(image[j][i]):
 						list_y.append(j)
 						list_x.append(i)
+						count_black_pixel += 1
 						get_pixel_start = True
 						gap = True
 
 			if not gap and get_pixel_start:
 				number_gap += 1
 
-			if number_gap == self.LIMIT_NUMBER_GAP:
+			# to reduce possible noise
+			if number_gap >= self.LIMIT_NUMBER_GAP and count_black_pixel <= self.LIMIT_BLACK_PIXEL:
+				list_x = []
+				list_y = []
 
+			# start to crop the image
+			if number_gap >= self.LIMIT_NUMBER_GAP and count_black_pixel > self.LIMIT_BLACK_PIXEL:
+				count_black_pixel = 0
 				number_gap = 0
 
 				if len(list_x) == 0 or len(list_y) == 0:
@@ -75,11 +85,16 @@ class Segmentor:
 				min_y = min(list_y)
 				max_y = max(list_y)
 
+				if min_x == max_x or min_y == max_y:
+					list_x = []
+					list_y = []
+					continue
+
 				image_part = image_pil.crop((min_x, min_y, max_x, max_y))
 				file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + str(number_part) + ".png"
 				image_part.save(file_save_name)
 				image_part.close()
-				list_result.append(image_translator.translate_image_to_string(file_save_name))
+				# list_result.append(image_translator.translate_image_to_string(file_save_name))
 
 				number_part += 1
 
@@ -101,7 +116,7 @@ class Segmentor:
 		file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + str(number_part) + ".png"
 		image_part.save(file_save_name)
 		image_part.close()
-		list_result.append(image_translator.translate_image_to_string(file_save_name))
+		# list_result.append(image_translator.translate_image_to_string(file_save_name))
 
 		return list_result
 
@@ -112,6 +127,7 @@ class Segmentor:
 			# for i in range(len(list_data)-1):
 			# 	if list_data[i] == 1:
 			# 		return True
+			# black
 			if list_data[3] == 255:
 				return True
 			return False
