@@ -1,9 +1,11 @@
 import numpy as np
 import uuid
 from skimage.segmentation import find_boundaries, mark_boundaries
-from skimage import io
+from skimage import io, img_as_ubyte
+from skimage.transform import resize
 from PIL import Image
 from ImageTranslator import ImageTranslator
+from ImageTransparator import ImageTransparater
 # This class will brute force the image contour and crop it
 
 
@@ -12,22 +14,25 @@ class Segmentor:
 	# LIMIT NUMBER GAP MEANS THAT TOTAL COLUMN 0
 	# IN THE IMAGE
 	LIMIT_NUMBER_GAP = 10
-	DIRECTORY_PATH = "/home/edwardsujono/Desktop/MachineLearning/cnn/img"
+	DIRECTORY_PATH = "/home/edwardsujono/Desktop/MachineLearning/cnn/img/"
 	LIMIT_BLACK_PIXEL = 50
 
 	def __init__(self):
+		self.image_translator = ImageTranslator()
+		self.image_transparater = ImageTransparater()
 		return
 
-	def start_segmenting_image(self, file_image_part, pass_image_name=True):
+	def start_segmenting_image(self, file_image_part, pass_image_name=True, file_non_transparent=None):
 
 		list_result = []
-		image_translator = ImageTranslator()
+
 		if pass_image_name:
 			image = io.imread(file_image_part)
+			image_to_cut = io.imread(file_non_transparent)
 		else:
 			image = file_image_part
 
-		image_pil = Image.open(file_image_part)
+		image_pil = Image.open(file_image_part) if file_non_transparent is None else Image.open(file_non_transparent)
 		result_boundaries = find_boundaries(image, mode='outer').astype(np.uint8)
 
 		x_range = image.shape[1]		# width
@@ -90,11 +95,26 @@ class Segmentor:
 					list_y = []
 					continue
 
-				image_part = image_pil.crop((min_x, min_y, max_x, max_y))
-				file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + str(number_part) + ".png"
+				image_part = image_pil.crop((min_x, min_y, max_x, max_y)).resize((45, 45), Image.ANTIALIAS)
+				# # image_part = resize(image[min_x:max_x, min_y:max_y], (45, 45), mode="reflect")
+				# file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + "_number_part_" + str(number_part) + ".jpg"
+				# print ("file_save_name:%s" % file_save_name)
+				# image_part = img_as_ubyte(image_part)
+				# image_part.save(file_save_name)
+				# image_part.close()
+				# # io.imsave(file_save_name, image_part)
+				# list_result.append(self.image_translator.translate_image_to_string(file_image_part))
+				# image_part = image_pil.thumbnail((min_x, min_y, max_x, max_y), Image.ANTIALIAS)
+				# image_part = resize(image_to_cut[min_x:max_x, min_y:max_y], (45, 45), mode="reflect")
+				# image_part = image[min_x:max_x, min_y:max_y], (45, 45), mode="reflect")
+				file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + "_number_part_" + str(number_part) + ".jpg"
+				# image_part = img_as_ubyte(image_part)
+				print ("file_save_name:%s" % file_save_name)
+				image_part = image_part.convert("L")
 				image_part.save(file_save_name)
 				image_part.close()
-				# list_result.append(image_translator.translate_image_to_string(file_save_name))
+				# io.imsave(file_save_name, image_part)
+				list_result.append(self.image_translator.translate_image_to_string(file_save_name))
 
 				number_part += 1
 
@@ -112,11 +132,18 @@ class Segmentor:
 		min_y = min(list_y)
 		max_y = max(list_y)
 
-		image_part = image_pil.crop((min_x, min_y, max_x, max_y))
-		file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + str(number_part) + ".png"
+		image_part = image_pil.crop((min_x, min_y, max_x, max_y)).resize((45, 45), Image.ANTIALIAS)
+		# image_part = image_pil.thumbnail((min_x, min_y, max_x, max_y), Image.ANTIALIAS)
+		# image_part = resize(image_to_cut[min_x:max_x, min_y:max_y], (45, 45), mode="reflect")
+		# image_part = image[min_x:max_x, min_y:max_y], (45, 45), mode="reflect")
+		file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + "_number_part_" + str(number_part) + ".jpg"
+		image_part = image_part.convert("L")
+		# image_part = img_as_ubyte(image_part)
+		print ("file_save_name:%s" % file_save_name)
 		image_part.save(file_save_name)
 		image_part.close()
-		# list_result.append(image_translator.translate_image_to_string(file_save_name))
+		# io.imsave(file_save_name, image_part)
+		list_result.append(self.image_translator.translate_image_to_string(file_save_name))
 
 		return list_result
 
