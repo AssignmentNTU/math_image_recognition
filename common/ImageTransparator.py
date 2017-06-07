@@ -50,4 +50,6 @@ class ImageTransparater:
         file_name_without_extension = full_file_name.split(".")[0]
         return file_name_without_extension
 
+    def start_transforming_back_to_jpg(self, filename):
 
+        

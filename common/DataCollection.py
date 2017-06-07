@@ -13,6 +13,12 @@ def transform_image_path_to_one_dimensional_matrices(image_path, use_image_path=
 	return image_in_pixel
 
 
+def resize_image_array(image_array):
+	image_in_pixel = np.resize(image_array, (1, 45*45))[0]
+	image_in_pixel = (image_in_pixel - image_in_pixel.min())/(image_in_pixel.max()-image_in_pixel.min())
+	return image_in_pixel
+
+
 def generate_one_hot_encoding(result_class, num_class):
 	list_zero = np.zeros((num_class, ), dtype=np.int)
 	list_zero[result_class] = 1
@@ -52,16 +58,23 @@ class DataCollection:
 		index_label = 0
 		num_class = self.NUM_CLASS
 
+		save_key_args = {}
+
 		for label in list_directory:
 			if index_label == num_class:
 				break
 			image_directory_path = image_directory + "/" + label
+			save_key_args[index_label] = label
 			for image_path in os.listdir(image_directory_path):
 				if self.data_directory.get(label) is None:
 					self.data_directory[label] = []
 				self.data_directory[label].append(image_directory_path + "/" + image_path)
 			self.label_one_hot_encoding[label] = generate_one_hot_encoding(index_label, num_class)
 			index_label += 1
+
+		# save key argument with respective label
+		with open("key_args.pickle", "wb") as handle:
+			pickle.dump(save_key_args, handle)
 
 		# will break the dictionary of data to the list which will be trained and tested
 		count_num_class = 0
