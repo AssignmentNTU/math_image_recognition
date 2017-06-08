@@ -1,11 +1,14 @@
 import numpy as np
 from PIL import Image
+from skimage import io
 
 
 class ImageTransparater:
 
     threshold = 100
     dist = 5
+
+    TRESHOLD_AS_BLACK = 10
 
     def __init__(self):
          return
@@ -50,6 +53,20 @@ class ImageTransparater:
         file_name_without_extension = full_file_name.split(".")[0]
         return file_name_without_extension
 
-    def start_transforming_back_to_jpg(self, filename):
+    def start_transforming_back_to_jpg(self, filename, return_array=False):
 
-        
+        image = io.imread(filename)
+
+        for w in range(len(image)):
+            for h in range(len(image[w])):
+                curr_pixel_color = image[w, h]
+
+                if curr_pixel_color <= self.TRESHOLD_AS_BLACK:
+                    image[w, h] = 0
+                else:
+                    image[w, h] = 255
+
+        image_name = self.remove_any_dot_extension(filename) + "_white.png"
+        io.imsave(image_name, image)
+
+        return image_name if not return_array else image

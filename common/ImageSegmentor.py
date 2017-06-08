@@ -14,7 +14,7 @@ class Segmentor:
 	# LIMIT NUMBER GAP MEANS THAT TOTAL COLUMN 0
 	# IN THE IMAGE
 	LIMIT_NUMBER_GAP = 10
-	DIRECTORY_PATH = "/home/edwardsujono/Desktop/MachineLearning/cnn/img/"
+	DIRECTORY_PATH = "/Users/edwardsujono/Python_Project/math_image_recognition/img/img_segmenting/"
 	LIMIT_BLACK_PIXEL = 50
 
 	def __init__(self):
@@ -110,11 +110,14 @@ class Segmentor:
 				file_save_name = self.DIRECTORY_PATH + str(uuid.uuid4()) + "_number_part_" + str(number_part) + ".jpg"
 				# image_part = img_as_ubyte(image_part)
 				print ("file_save_name:%s" % file_save_name)
+
 				image_part = image_part.convert("L")
 				image_part.save(file_save_name)
 				image_part.close()
 				# io.imsave(file_save_name, image_part)
-				list_result.append(self.image_translator.translate_image_to_string(file_save_name))
+				image_transform_white = self.image_transparater.start_transforming_back_to_jpg(file_save_name, return_array=False)
+				print ("file_save_white:%s" % image_transform_white)
+				list_result.append(self.image_translator.translate_image_to_string(image_transform_white))
 
 				number_part += 1
 
@@ -143,7 +146,9 @@ class Segmentor:
 		image_part.save(file_save_name)
 		image_part.close()
 		# io.imsave(file_save_name, image_part)
-		list_result.append(self.image_translator.translate_image_to_string(file_save_name))
+		image_transform_white = self.image_transparater.start_transforming_back_to_jpg(file_save_name, return_array=False)
+		print ("file_save_white:%s" % image_transform_white)
+		list_result.append(self.image_translator.translate_image_to_string(image_transform_white))
 
 		return list_result
 
