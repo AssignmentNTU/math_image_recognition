@@ -1,14 +1,15 @@
 import numpy as np
 from PIL import Image
 from skimage import io
-
+from skimage.morphology import skeletonize
+import copy
 
 class ImageTransparater:
 
     threshold = 100
     dist = 5
 
-    TRESHOLD_AS_BLACK = 10
+    TRESHOLD_AS_BLACK = 50
 
     def __init__(self):
          return
@@ -60,13 +61,24 @@ class ImageTransparater:
         for w in range(len(image)):
             for h in range(len(image[w])):
                 curr_pixel_color = image[w, h]
-
                 if curr_pixel_color <= self.TRESHOLD_AS_BLACK:
-                    image[w, h] = 0
+                    image[w, h] = 1
                 else:
-                    image[w, h] = 255
+                    image[w, h] = 0
+
+        old_image = copy.deepcopy(image)
+
+        image = skeletonize(image)
+
+        for w in range(len(image)):
+            for h in range(len(image[w])):
+                curr_pixel_color = image[w, h]
+                if curr_pixel_color:
+                    old_image[w, h] = 0
+                else:
+                    old_image[w, h] = 255
 
         image_name = self.remove_any_dot_extension(filename) + "_white.png"
-        io.imsave(image_name, image)
+        io.imsave(image_name, old_image)
 
         return image_name if not return_array else image
